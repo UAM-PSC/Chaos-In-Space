@@ -1,17 +1,24 @@
 package Entities;
-
+import Graficos.SpriteSheet;
 import Main.Game;
-
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
-public class AsteroidS extends Enemy {
-    private double x= Game.WIDTH/2,y=Game.HEIGHT/2,speed=3;
-    private int width=40,height=40;
 
-    public AsteroidS(int x, int y, int width, int height) {
-        super(x, y, width, height);
+public class AsteroidS extends Enemy {
+
+
+    private double x, y, speed = 3;
+    private int width=40, height=40;
+    private Player player;
+
+    public AsteroidS(int x, int y, int width, int height, BufferedImage sprite) {
+        super(x, y, width, height,sprite);
+        this.setMheight(this.height);
+        this.setMwidth(this.width);
     }
+
 
     public void tick() {
 
@@ -45,28 +52,74 @@ public class AsteroidS extends Enemy {
             this.dx = Math.sin(Math.toRadians(this.angle));
             this.dy = Math.cos(Math.toRadians(this.angle));
         }
+        colisionShoot();
 
 
     }
 
+
+
+    public void colisionShoot() {  // valida colisao do asteroide com tiro
+        for (int i = 0; i < Game.shoots.size(); i++) {
+            Entity e = Game.shoots.get(i);
+            if(e instanceof PlayerShoot) {
+                if (isColidding(this, e)) {
+                    Game.entities.remove(this);
+                    Game.shoots.remove(e);
+                    Game.player.setScore(Game.player.getScore()+5);
+                }
+            }
+        }
+
+    }
 
 
     public void render(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setColor(Color.red);
         g2.translate(x, y);
-        g2.fillRect(0,0,width,height);
+        g.drawImage(Entity.asteroidS,(int)this.getX(),(int)this.getY(),null);
 
-
-        if(x > Game.WIDTH){
-            x=0;
-        }else if(x < 0){
+        if (x > Game.WIDTH) {
+            x = 0;
+        } else if (x < 0) {
             x = Game.WIDTH;
         }
-        if(y > Game.HEIGHT){
-            y=0;
-        }else if ( y < 0 ){
-            y=Game.HEIGHT;
+        if (y > Game.HEIGHT) {
+            y = 0;
+        } else if (y < 0) {
+            y = Game.HEIGHT;
         }
+
+
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
+    }
+
+    @Override
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 }
+
+

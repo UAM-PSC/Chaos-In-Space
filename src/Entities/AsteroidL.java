@@ -1,6 +1,9 @@
 package Entities;
+import Graficos.SpriteSheet;
+import Main.EnemySpawn;
 import Main.Game;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 
@@ -8,11 +11,13 @@ public class AsteroidL extends Enemy {
 
 
     private double x, y, speed = 3;
-    private int width, height;
+    private int width=160, height=160;
     private Player player;
 
-    public AsteroidL(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public AsteroidL(int x, int y, int width, int height, BufferedImage sprite) {
+        super(x, y, width, height,sprite);
+        this.setMheight(this.height);
+        this.setMwidth(this.width);
     }
 
 
@@ -48,34 +53,43 @@ public class AsteroidL extends Enemy {
             this.dx = Math.sin(Math.toRadians(this.angle));
             this.dy = Math.cos(Math.toRadians(this.angle));
         }
+        colisionShoot();
 
 
     }
 
-    public void isColiddingShoot() {
+
+
+    public void colisionShoot() { // valida colisao do asteroide com o tiro
         for (int i = 0; i < Game.shoots.size(); i++) {
-            PlayerShoot e = new PlayerShoot((int) this.x, (int) this.y, this.height, this.width, (int) player.getX(), (int) player.getY(), player.getAngle());
-            if (e instanceof PlayerShoot) {
+            Entity e = Game.shoots.get(i);
+            if(e instanceof PlayerShoot) {
                 if (isColidding(this, e)) {
-                    Game.shoots.remove(e);
-
-
+                    Random rand = new Random();
+                    int spawn = rand.nextInt(101);
+                        if(spawn <= 70){
+                           Game.shoots.remove(e);
+                           Game.entities.remove(this);
+                            EnemySpawn spawnS = new EnemySpawn();
+                            spawnS.spawnSmall();
+                            spawnS.spawnSmall();
+                            Game.player.setScore(Game.player.getScore()+20);
+                        }else{
+                            Game.shoots.remove(e);
+                            Game.entities.remove(this);
+                            Game.player.setScore(Game.player.getScore()+20);
+                        }
                 }
-
             }
-
-
         }
-
-
     }
 
 
     public void render(Graphics g) {
         Graphics2D g2 = (Graphics2D) g.create();
-        g2.setColor(Color.red);
         g2.translate(x, y);
-        g2.fillRect(0, 0, 160, 160);
+        g.drawImage(Entity.asteroidL, (int) this.getX(),(int)this.getY(),null);
+
 
 
         if (x > Game.WIDTH) {
@@ -88,8 +102,6 @@ public class AsteroidL extends Enemy {
         } else if (y < 0) {
             y = Game.HEIGHT;
         }
-
-
     }
 
     @Override

@@ -1,8 +1,10 @@
 package Entities;
 
+import Graficos.SpriteSheet;
 import Main.Game;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 public abstract class Enemy extends Entity{
@@ -12,11 +14,11 @@ public abstract class Enemy extends Entity{
     protected String type;
 
 
-    public Enemy(int x, int y, int width, int height) {
-        super(x, y, width, height);
+    public Enemy(int x, int y, int width, int height, BufferedImage sprite) {
+        super(x, y, width, height,sprite);
     }
 
-    public void tick() {
+    public void tick() { // metodo onde a logica do inimigo e feita
 
 
         Random random = new Random();
@@ -53,14 +55,14 @@ public abstract class Enemy extends Entity{
     }
 
 
-    public void render(Graphics g) {
+    public void render(Graphics g) { // metodo onde o inimigo e renderizado
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setColor(Color.red);
         g2.translate(x, y);
         g2.fillRect(0, 0, 160, 160);
 
 
-        if (x > Game.WIDTH) {
+        if (x > Game.WIDTH) { //feito para inimigo nao sair da tela para o inifinito e alem
             x = 0;
         } else if (x < 0) {
             x = Game.WIDTH;

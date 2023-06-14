@@ -1,27 +1,31 @@
 package Entities;
 
+import Graficos.UI;
 import Main.Game;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+
 public class Player extends Entity{
         private boolean toRight=false,toLeft=false,toFront=false,isShooting=false;
         public double angle=0;
-        private double spinSpeed=1,flightSpeed=0.8,slidingSpeed=0.3;
+        private double spinSpeed=2,flightSpeed=0.8,slidingSpeed=0.3;
         private double lastXDirection,lastYDirection,dx,dy;
+        private int life=3;
+        private boolean isDamaged=false;
+        private int damageFrames=0;
+        public int score=0;
 
-    public Player(int x, int y, int width, int height) {
-        super(x, y, width, height);
+
+    public Player(int x, int y, int width, int height, BufferedImage sprite) {
+        super(x, y, width, height,sprite);
     }
 
 
-    public void tick(){
+    public void tick(){ //metodo onde e executado a logica do player/jogador
 
 
-        if(angle == 361 || angle == -361){
-            angle=0;
-        }
 
 
         x+=lastXDirection*slidingSpeed;
@@ -40,26 +44,36 @@ public class Player extends Entity{
             lastYDirection = dy;
         }
 
-        if(isShooting){
+        if(isShooting){ // verifica se jogador esta atirando
             isShooting=false;
-            PlayerShoot shoot = new PlayerShoot(0,0,1,20,(int)x,(int)y,angle);
+            PlayerShoot shoot = new PlayerShoot(0,0,1,20,(int)x,(int)y,angle,Game.sprite.getSprite(0,0,1,20));
             Game.shoots.add(shoot);
 
         }
-        this.isColiddingEnemy();
 
+        this.isColiddingEnemy();
+        if(isDamaged){ //define quantidade de frames de invunerabilidade do player ao ser atigido
+            if(damageFrames == 0){
+                life--;
+                damageFrames=30;
+            }
+            damageFrames--;
+            isDamaged=false;
+        }
+
+        if(life == 0){ //verifica se jogador ainda tem vidas
+            Game.gameState="GAMEOVER";
+        }
     }
 
 
-    public void isColiddingEnemy(){
+    public void isColiddingEnemy(){ //verifica colisao de jogador com inimigo
         for (int i = 0; i < Game.entities.size(); i++) {
             Entity e = Game.entities.get(i);
-            if (e instanceof AsteroidL) {
+            if (e instanceof Enemy) {
                 if (isColidding(this, e)) {
-                    Game.entities.remove(e);
-                    System.out.println("ESTOU COLIDINDO");
+                    isDamaged=true;
                 }
-
             }
         }
 
@@ -67,15 +81,18 @@ public class Player extends Entity{
 
 
 
-    public void render(Graphics g){
+    public void render(Graphics g){ // renderiza o jogador
 
         Graphics2D g2 =(Graphics2D) g.create();
         g2.setColor(Color.green);
         g2.translate(x, y);
         g2.rotate(Math.toRadians(angle));
-        g2.fillPolygon(new int[] {-10, 10, 0}, new int[] {20, 20, -20}, 3);
-
-        if(x > Game.WIDTH){
+        if(toFront) {
+            g2.drawImage(Entity.playerAcl, -Entity.player.getWidth() / 2, -Entity.player.getHeight() / 2, null);
+        }else {
+            g2.drawImage(Entity.player, -Entity.player.getWidth() / 2, -Entity.player.getHeight() / 2, null);
+        }
+        if(x > Game.WIDTH){ // feito para jogador atravessar a tela de um lado para outro
             x=0;
         }else if(x < 0){
             x = Game.WIDTH;
@@ -98,8 +115,22 @@ public class Player extends Entity{
         this.toFront = toFront;
     }
 
+    public int getLife() {
+        return life;
+    }
+
+    public void setLife(int life) {
+        this.life = life;
+    }
 
 
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
 
     public boolean isToRight() {
         return toRight;
